@@ -10,11 +10,12 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import PopupWithConfirmation from './PopupWithConfirmation';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 import InfoTooltip from './InfoTooltip';
+import * as auth from '../utils/Auth';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -40,6 +41,15 @@ function App() {
   const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [isRegistrationSuccessful, setIsRegistrationSuccessful] =
     useState(false);
+  const [authorizationEmail, setAuthorizationEmail] = useState('');
+
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    if (loggedIn) {
+      navigate('/');
+    }
+  }, [loggedIn, navigate]);
 
   React.useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -135,6 +145,7 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsOpenCardPopupOpen(false);
     setIsOpenPopupWithConfirmation(false);
+    setIsInfoTooltipOpen(false);
   };
 
   function handleUpdateUser(newUserInfo) {
@@ -210,31 +221,95 @@ function App() {
 
   useKeyPress('Escape');
 
+  // Проверка токена
+  const handleTokenCheck = () => {
+    const jwt = localStorage.getItem('jwt');
+    if (!jwt) {
+      return;
+    }
+    auth
+      .checkToken(jwt)
+      .then((data) => {
+        setAuthorizationEmail(data.email);
+        setCurrentUser(data);
+        setLoggedIn(true);
+        navigate('/');
+      })
+      .catch((err) => console.log(err));
+    api
+      .getInitialCards(jwt)
+      .then((initialCards) => {
+        setCards(initialCards);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const openInfoTooltip = () => {
+    setIsInfoTooltipOpen(true);
+  };
+
+  // Регистрация и Авторизация профиля
+  const handleRegistration = (data) => {
+    return auth
+      .register(data)
+      .then(() => {
+        setIsRegistrationSuccessful(true);
+        openInfoTooltip();
+        navigate('/sign-in');
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsRegistrationSuccessful(false);
+        openInfoTooltip();
+      });
+  };
+
+  const handleAuthorization = (data) => {
+    return auth
+      .authorize(data)
+      .then((data) => {
+        setLoggedIn(true);
+        localStorage.setItem('jwt', data.token);
+        handleTokenCheck();
+        navigate('/');
+      })
+      .catch((err) => {
+        console.log(err);
+        openInfoTooltip();
+      });
+  };
+
+  useEffect(() => {
+    handleTokenCheck();
+  }, [navigate]);
+
+  //Выход
+  const handleSignOut = () => {
+    localStorage.removeItem('jwt');
+    navigate('/sign-in');
+    setLoggedIn(false);
+    setCurrentUser({});
+    setAuthorizationEmail('');
+  };
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="App">
         <div className="page">
-          <Header />
+          <Header
+            loggedIn={loggedIn}
+            userEmail={authorizationEmail}
+            onSignOut={handleSignOut}
+          />
           <Routes>
-            <Route path="/sign-in" element={<Login />} />
-            <Route path="/sign-up" element={<Register />} />
-            {/* <Route
-              path="/*"
-              element={
-                <Main
-                  onEditAvatar={openEditAvatarClick}
-                  onEditProfile={openEditProfileClick}
-                  onAddPlace={openAddPlaceClick}
-                  userAvatar={userAvatar}
-                  userName={userName}
-                  userDescription={userDescription}
-                  cards={cards}
-                  onCardClick={handleCardClick}
-                  onCardLike={handleCardLike}
-                  onCardDelete={openPopupWithConfirmation}
-                />
-              }
-            /> */}
+            <Route
+              path="/sign-in"
+              element={<Login onLogin={handleAuthorization} />}
+            />
+            <Route
+              path="/sign-up"
+              element={<Register onRegister={handleRegistration} />}
+            />
             <Route
               path="/*"
               element={

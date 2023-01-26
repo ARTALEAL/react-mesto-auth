@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
 import useForm from '../hooks/useForm';
 
-function Register() {
+function Register({ onRegister }) {
   const { enteredValues, errors, handleChange } = useForm({});
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onRegister(enteredValues);
+  };
+
   return (
     <div className="auth">
       <h2 className="auth__title">Регистрация</h2>
-      <form className="form auth__form" noValidate>
+      <form className="form auth__form" onSubmit={handleSubmit} noValidate>
         <input
           type="email"
           placeholder="Email"

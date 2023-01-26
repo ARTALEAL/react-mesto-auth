@@ -1,11 +1,19 @@
 import useForm from '../hooks/useForm';
 
-function Login() {
+function Login({ onLogin }) {
   const { enteredValues, errors, handleChange } = useForm({});
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!enteredValues.email || !enteredValues.password) {
+      return;
+    }
+    onLogin(enteredValues);
+  };
   return (
     <div className="auth">
       <h2 className="auth__title">Вход</h2>
-      <form className="form auth__form" noValidate>
+      <form className="form auth__form" onSubmit={handleSubmit} noValidate>
         <input
           type="email"
           placeholder="Email"
