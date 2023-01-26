@@ -56,6 +56,8 @@ html {
 @import url(./blocks/popup/_gallery/popup_gallery.css);
 @import url(./blocks/popup/__error-message/popup__error-message.css);
 @import url(./blocks/popup/__error-message/_active/popup__error-message_active.css);
+@import url(./blocks/popup/__signup-icon/popup__signup-icon.css);
+@import url(./blocks/popup/__signup-title/popup__signup-title.css);
 
 /*forms*/
 @import url(./blocks/auth/auth.css);

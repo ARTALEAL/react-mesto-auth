@@ -13,6 +13,8 @@ import PopupWithConfirmation from './PopupWithConfirmation';
 import { Routes, Route } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
+import ProtectedRoute from './ProtectedRoute';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -33,6 +35,11 @@ function App() {
   const [cards, setCards] = useState([]);
 
   const [currentUser, setCurrentUser] = useState({});
+
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [isRegistrationSuccessful, setIsRegistrationSuccessful] =
+    useState(false);
 
   React.useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -211,7 +218,7 @@ function App() {
           <Routes>
             <Route path="/sign-in" element={<Login />} />
             <Route path="/sign-up" element={<Register />} />
-            <Route
+            {/* <Route
               path="/*"
               element={
                 <Main
@@ -226,6 +233,25 @@ function App() {
                   onCardLike={handleCardLike}
                   onCardDelete={openPopupWithConfirmation}
                 />
+              }
+            /> */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute loggedIn={loggedIn}>
+                  <Main
+                    onEditAvatar={openEditAvatarClick}
+                    onEditProfile={openEditProfileClick}
+                    onAddPlace={openAddPlaceClick}
+                    userAvatar={userAvatar}
+                    userName={userName}
+                    userDescription={userDescription}
+                    cards={cards}
+                    onCardClick={handleCardClick}
+                    onCardLike={handleCardLike}
+                    onCardDelete={openPopupWithConfirmation}
+                  />
+                </ProtectedRoute>
               }
             />
           </Routes>
@@ -266,6 +292,11 @@ function App() {
             onLoading={isLoading}
             onSubmit={handleCardDelete}
             card={removedCardId}
+          />
+          <InfoTooltip
+            isOpen={isInfoTooltipOpen}
+            onClose={closeAllPopups}
+            isSuccess={isRegistrationSuccessful}
           />
         </div>
       </div>
