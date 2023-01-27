@@ -63,7 +63,7 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [navigate]);
 
   function checkPopUpOpen() {
     if (isEditAvatarPopupOpen) {
@@ -108,7 +108,6 @@ function App() {
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
-
     // Отправляем запрос в API и получаем обновлённые данные карточки
     api
       .changeLikeCardStatus(card._id, !isLiked)
@@ -230,9 +229,9 @@ function App() {
     auth
       .checkToken(jwt)
       .then((data) => {
-        setAuthorizationEmail(data.email);
         setCurrentUser(data);
         setLoggedIn(true);
+        setAuthorizationEmail(data.data.email);
         navigate('/');
       })
       .catch((err) => console.log(err));
@@ -268,9 +267,9 @@ function App() {
     return auth
       .authorize(data)
       .then((data) => {
-        setLoggedIn(true);
         localStorage.setItem('jwt', data.token);
         handleTokenCheck();
+        setLoggedIn(true);
         navigate('/');
       })
       .catch((err) => {
@@ -281,7 +280,7 @@ function App() {
 
   useEffect(() => {
     handleTokenCheck();
-  }, [navigate]);
+  }, []);
 
   //Выход
   const handleSignOut = () => {
@@ -311,7 +310,7 @@ function App() {
               element={<Register onRegister={handleRegistration} />}
             />
             <Route
-              path="/*"
+              path="*"
               element={
                 <ProtectedRoute loggedIn={loggedIn}>
                   <Main
