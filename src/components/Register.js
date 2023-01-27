@@ -3,7 +3,6 @@ import useForm from '../hooks/useForm';
 
 function Register({ onRegister }) {
   const { enteredValues, errors, handleChange } = useForm({});
-  console.log(typeof enteredValues);
   const handleSubmit = (event) => {
     event.preventDefault();
     onRegister(enteredValues);
