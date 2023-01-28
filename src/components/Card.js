@@ -24,7 +24,7 @@ function Card({ card, onCardClick, onCardLike, onCardDelete }) {
   }
 
   return (
-    <div className="element" key={card._id}>
+    <div className="element">
       {isOwn && (
         <button
           className="element__delete-button"

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../index.css';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -30,7 +29,6 @@ function App() {
   const [isOpenPopup, setIsOpenPopup] = useState(false);
 
   //Api states
-  const [userAvatar, setUserAvatar] = useState('');
   const [userName, setUserName] = useState('');
   const [userDescription, setUserDescription] = useState('');
   const [cards, setCards] = useState([]);
@@ -43,7 +41,7 @@ function App() {
     useState(false);
   const [authorizationEmail, setAuthorizationEmail] = useState('');
 
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (loggedIn) {
@@ -56,14 +54,13 @@ function App() {
       .then(([user, cards]) => {
         setUserName(user.name);
         setUserDescription(user.about);
-        setUserAvatar(user.avatar);
         setCurrentUser(user);
-        setCards([...cards]);
+        setCards(cards);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [navigate]);
+  }, []);
 
   function checkPopUpOpen() {
     if (isEditAvatarPopupOpen) {
@@ -183,6 +180,9 @@ function App() {
         setCards([data, ...cards]);
         closeAllPopups();
       })
+      .catch((err) => {
+        console.log(`Ошибка: ${err}`);
+      })
       .finally(() => setIsLoading(false));
   }
 
@@ -268,7 +268,6 @@ function App() {
       .authorize(data)
       .then((data) => {
         localStorage.setItem('jwt', data.token);
-        handleTokenCheck();
         setLoggedIn(true);
         navigate('/');
       })
@@ -317,7 +316,6 @@ function App() {
                     onEditAvatar={openEditAvatarClick}
                     onEditProfile={openEditProfileClick}
                     onAddPlace={openAddPlaceClick}
-                    userAvatar={userAvatar}
                     userName={userName}
                     userDescription={userDescription}
                     cards={cards}
